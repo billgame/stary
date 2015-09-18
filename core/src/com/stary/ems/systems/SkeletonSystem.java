@@ -59,7 +59,7 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		Skeleton skeleton=new Skeleton(skeletonData);
 		skeleton.setPosition(skeletonComponent.x, skeletonComponent.y);
 		skeleton.setSkin("goblin");
-		skeleton.setFlipX(true);		//FIXME box2d body not correct
+//		skeleton.setFlipX(true);		//FIXME box2d body not correct
 		skeleton.updateWorldTransform();
 		AnimationStateData stateData = new AnimationStateData(skeletonData); // Defines mixing (crossfading) between animations.
 //		stateData.setMix("run", "jump", 0.2f);
@@ -107,7 +107,7 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		}//for each slots
 
 		skeleton.updateWorldTransform();
-		Box2dUtil.updateBody(skeleton);
+//		Box2dUtil.updateBody(skeleton);
 
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body
 		Box2dUtil.spineToBox2d(skeleton.getSlots());  //position box2d bodies
