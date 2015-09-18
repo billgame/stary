@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="1" tilewidth="1080" tileheight="607" nextobjectid="76">
+ <tileset firstgid="1" name="land1" tilewidth="1051" tileheight="243" tilecount="1">
+  <image source="land1.png" width="1051" height="243"/>
+ </tileset>
+ <tileset firstgid="2" name="land2" tilewidth="1052" tileheight="243" tilecount="1">
+  <image source="land2.png" width="1052" height="243"/>
+ </tileset>
+ <tileset firstgid="3" name="building1" tilewidth="817" tileheight="593" tilecount="1">
+  <image source="building1.png" width="817" height="593"/>
+ </tileset>
+ <tileset firstgid="4" name="mount1" tilewidth="559" tileheight="522" tilecount="1">
+  <image source="mount1.png" width="559" height="522"/>
+ </tileset>
+ <tileset firstgid="5" name="mount2" tilewidth="378" tileheight="471" tilecount="1">
+  <image source="mount2.png" width="378" height="471"/>
+ </tileset>
+ <tileset firstgid="6" name="forest1" tilewidth="359" tileheight="157" tilecount="1">
+  <image source="forest1.png" width="359" height="157"/>
+ </tileset>
+ <tileset firstgid="7" name="forest3" tilewidth="541" tileheight="221" tilecount="1">
+  <image source="forest3.png" width="541" height="221"/>
+ </tileset>
+ <tileset firstgid="8" name="forest2" tilewidth="457" tileheight="255" tilecount="1">
+  <image source="forest2.png" width="457" height="255"/>
+ </tileset>
+ <layer name="tileLayer_bill" width="10" height="1" opacity="0.8">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAOAAAAKAAB
+  </data>
+ </layer>
+ <objectgroup name="objectLayer_bill_distance1">
+  <object id="31" name="building1" gid="3" x="238" y="535.333" width="382" height="277.266"/>
+ </objectgroup>
+ <objectgroup name="objectLayer_bill_close1">
+  <object id="32" name="mountain1" gid="4" x="0" y="500" width="383" height="357.649"/>
+  <object id="33" name="mountain2" gid="5" x="531" y="422" width="214.28" height="267"/>
+  <object id="43" name="mountain3" gid="2147483652" x="650" y="483" width="603" height="318"/>
+ </objectgroup>
+ <objectgroup name="objectLayer_bill_close2">
+  <object id="39" name="forest1" gid="7" x="2" y="492" width="421" height="171.98"/>
+  <object id="40" name="forest2" gid="8" x="457" y="532" width="457" height="255"/>
+  <object id="41" name="forest3" gid="8" x="759.271" y="517" width="381.729" height="213"/>
+  <object id="42" name="forest4" gid="7" x="1071" y="499" width="435.738" height="178"/>
+ </objectgroup>
+ <objectgroup name="objectLayer_bill_land1">
+  <object id="24" name="land1" gid="1" x="-171.667" y="645.061" width="1051" height="243"/>
+  <object id="26" name="land2" gid="2147483650" x="598.606" y="637.848" width="1052" height="243"/>
+  <object id="27" name="land3" gid="2" x="1138" y="643.909" width="1052" height="243"/>
+  <object id="28" name="land4" gid="1" x="1948.09" y="634.818" width="1051" height="243"/>
+ </objectgroup>
+ <objectgroup name="actors">
+  <object id="53" name="goblins-mesh" x="221" y="288">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup name="objectLayer_bill_fore1"/>
+ <objectgroup name="physicalLayer">
+  <object id="22" name="physicalLand" x="-57.1818" y="546.303">
+   <properties>
+    <property name="bodyType" value="s"/>
+    <property name="material" value="grass"/>
+   </properties>
+   <polyline points="77.3333,-17.3333 227.636,-2.90909 393.576,-19.7576 481.818,-45.4545 562.666,-80.1212 663.031,-80.1212 750.182,-60.9697 818.546,-37.9394 887.879,-27.2727 1093.94,-6.06061 1233.33,3.0303 1390.91,-3.0303 1590.91,-12.1212 1815.15,-39.3939 1896.97,-75.7576 2006.06,-75.7576 2227.27,-63.6364 2412.12,-42.4242 2496.97,-57.5758 2621.21,-54.5455 2793.94,-45.4545 2954.79,-16.3636"/>
+  </object>
+  <object id="74" name="b" x="259" y="357" width="87" height="111">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
