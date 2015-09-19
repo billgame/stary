@@ -12,6 +12,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -39,7 +40,6 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 	
 	public SkeletonSystem(Family family) {
 		super(family);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -53,13 +53,19 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 				return new Box2dBoundingBoxAttachment(name);
 			}
 		};
-		SkeletonJson sklJson = new SkeletonJson(al);
-		sklJson.setScale(skeletonComponent.pxToPhy);
-		SkeletonData skeletonData = sklJson.readSkeletonData(Gdx.files.internal(character+name+".json"));
+		SkeletonJson skeletonJson = new SkeletonJson(al);
+		skeletonJson.setScale(skeletonComponent.pxToPhy);
+		SkeletonData skeletonData = skeletonJson.readSkeletonData(Gdx.files.internal(character+name+".json"));
 		Skeleton skeleton=new Skeleton(skeletonData);
 		skeleton.setPosition(skeletonComponent.x, skeletonComponent.y);
 		skeleton.setSkin("goblin");
-//		skeleton.setFlipX(true);		//FIXME box2d body not correct
+//		skeleton.setFlipX(true);		//水平翻转
+//		skeleton.setFlipY(true);		//垂直翻转
+		
+		boolean flipx=skeleton.getFlipX();
+		boolean flipy=skeleton.getFlipY();
+
+		//FIXME box2d body not correct
 		skeleton.updateWorldTransform();
 		AnimationStateData stateData = new AnimationStateData(skeletonData); // Defines mixing (crossfading) between animations.
 //		stateData.setMix("run", "jump", 0.2f);
@@ -69,7 +75,7 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		// Queue animations on track 0.
 		state.setAnimation(0, "walk", true);
 
-		skeletonComponent.skeletonJson=sklJson;
+		skeletonComponent.skeletonJson=skeletonJson;
 		skeletonComponent.skeletonData=skeletonData;
 		skeletonComponent.skeleton=skeleton;
 		skeletonComponent.animationStateData=stateData;
@@ -81,18 +87,30 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 			Slot slot=skeleton.getSlots().get(s);
 			Attachment attachment = slot.getAttachment();
 			if (! (attachment instanceof Box2dBoundingBoxAttachment)) continue;
-			Box2dBoundingBoxAttachment bba=(Box2dBoundingBoxAttachment)attachment;
-			float[] worldVertices=new float[bba.getVertices().length];
-			bba.computeWorldVertices(slot.getBone(), worldVertices);
+			Box2dBoundingBoxAttachment bbba=(Box2dBoundingBoxAttachment)attachment;
+//			float[] worldVertices=new float[bba.getVertices().length];
+//			bba.computeWorldVertices(slot.getBone(), worldVertices);
 			//3 <= count && count <= 8
 			//vertices wouldn't more than 8 in polygonShape
 			PolygonShape shape=new PolygonShape(); 
 //			ChainShape shape=new ChainShape();
 //			shape.set(worldVertices);
-			shape.set(bba.getVertices());
+			float[] worldVertices=new float[bbba.getVertices().length];
+			float[] newVertices=new float[worldVertices.length];
+			float[] localVertices = bbba.getVertices(); //BoundingBoxAttachment
+			for (int i = 0; i < bbba.getVertices().length; i++) {
+	            for (int v = 0 ; v < localVertices.length; v += 2) {
+	                float px = localVertices[v];
+	                float py = localVertices[v + 1];
+	                newVertices[v]=flipx?-px:px;
+	                newVertices[v+1]=flipy?-py:py;
+	             }
+			}
+			shape.set(newVertices);
+//			shape.set(bbba.getVertices());
 //			shape.createLoop(worldVertices);
 			BodyDef bodyDef=new BodyDef();
-			bodyDef.type=BodyType.DynamicBody;
+			bodyDef.type=BodyType.StaticBody;
 			FixtureDef actorFixtureDef=new FixtureDef();
 			actorFixtureDef.shape=shape;
 			//TODO [bill]terrian density,friction...will be setting in database manually
@@ -103,14 +121,21 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 			actorComponentBody.createFixture(actorFixtureDef);
 			actorFixtureDef.shape=null;
 			shape.dispose();
-			bba.setBody(actorComponentBody);//setup body to attachment
+			float x = skeleton.getX() + slot.getBone().getWorldX();
+			float y = skeleton.getY() + slot.getBone().getWorldY();
+			float rotation = slot.getBone().getWorldRotation();
+			rotation=flipx?-rotation:rotation;
+			rotation=flipy?-rotation:rotation;
+//			System.out.println("body "+x+" "+y);
+			actorComponentBody.setTransform(x,y,rotation*MathUtils.degRad);
+			bbba.setBody(actorComponentBody);//setup body to attachment
 		}//for each slots
 
-		skeleton.updateWorldTransform();
-//		Box2dUtil.updateBody(skeleton);
+		skeleton.updateWorldTransform();	
+//		Box2dUtil.flipXBody(skeleton);		//body水平翻转
 
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body
-		Box2dUtil.spineToBox2d(skeleton.getSlots());  //position box2d bodies
+//		Box2dUtil.spineToBox2d(skeleton.getSlots());  //position box2d bodies
 	}
 
 	@Override
@@ -122,14 +147,14 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 
 		SkeletonBox2dComponent skeletonComponent=skeletonBox2dComponent.get(entity);
 		AnimationState animationState=skeletonComponent.animationState;
-
+		Skeleton skeleton=skeletonComponent.skeleton;
 		animationState.update(deltaTime);
-		animationState.apply(skeletonComponent.skeleton);
-		skeletonComponent.skeleton.updateWorldTransform();
+		animationState.apply(skeleton);
 		
 		if(GameData.instance.land!=null){
 			Skeleton skl=skeletonComponent.skeleton;
 			float x=skl.getX();
+//			float y1=skl.getY();//skl.getY()+deltaTime*GameData.instance.gravity.y/5;
 			float y1=skl.getY()+deltaTime*GameData.instance.gravity.y/5;
 			float y=Box2dUtil.getLandY(GameData.instance.land, x);
 			if (y1<y) {
@@ -137,9 +162,10 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 			}
 			skl.setPosition(skl.getX()+0.01f, y1);
 		}
+		skeletonComponent.skeleton.updateWorldTransform();
 		
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body
-		Box2dUtil.spineToBox2d(skeletonComponent.skeleton.getSlots());
+		Box2dUtil.spineToBox2d(skeleton);
 //		Box2dUtil.box2dToSpine(skeletonComponent.skeleton.getSlots());
 		
 	}

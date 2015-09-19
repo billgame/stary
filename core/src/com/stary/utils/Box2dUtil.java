@@ -2,25 +2,32 @@ package com.stary.utils;
 
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.CircleMapObject;
+import com.badlogic.gdx.maps.objects.EllipseMapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Ellipse;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
 import com.esotericsoftware.spine.Bone;
 import com.esotericsoftware.spine.Skeleton;
+import com.esotericsoftware.spine.SkeletonBounds;
 import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Attachment;
 import com.stary.data.GameData;
@@ -28,10 +35,13 @@ import com.stary.data.GameData;
 public class Box2dUtil {
 	public static Shape getShape(MapObject mapObject,float pxToPhy){
 		Shape shape = null;
+		System.out.println(mapObject);
 		if (mapObject instanceof TextureMapObject) {
 			
 		}else if(mapObject instanceof RectangleMapObject){
 			shape=getRectangle((RectangleMapObject)mapObject,pxToPhy);
+		}else if(mapObject instanceof EllipseMapObject){
+			shape=getEllipse((EllipseMapObject)mapObject,pxToPhy);
 		}else if(mapObject instanceof CircleMapObject){
 			shape=getCircle((CircleMapObject)mapObject,pxToPhy);
 		}else if(mapObject instanceof PolygonMapObject){
@@ -61,7 +71,6 @@ public class Box2dUtil {
 		center.scl(pxToPhy);
 		
 		float r=rectangleMapObject.getProperties().get("rotation", 0f, Float.class);
-		System.out.println("rotation "+r);
 //		float cos=MathUtils.cosDeg(r);
 //		float sin=MathUtils.cosDeg(r);
 //		center.rotate(-r);
@@ -77,6 +86,15 @@ public class Box2dUtil {
 		CircleShape circleShape=new CircleShape();
 		circleShape.setPosition(pos);
 		circleShape.setRadius(c.radius*pxToPhy);
+		return circleShape;
+	}
+	public static Shape getEllipse(EllipseMapObject ellipseMapObject,float pxToPhy){
+		Ellipse e=ellipseMapObject.getEllipse();
+		float r=e.width>e.height?e.width:e.height;
+		Vector2 pos=new Vector2(e.x*pxToPhy, e.y*pxToPhy);
+		CircleShape circleShape=new CircleShape();
+		circleShape.setPosition(pos);
+		circleShape.setRadius(r*pxToPhy);
 		return circleShape;
 	}
 	public static Shape getPolygon(PolygonMapObject polygonMapObject,float pxToPhy){
@@ -135,16 +153,17 @@ public class Box2dUtil {
 	 * spine 2 box2d 按spine skeleton所有boundingbox的位置/角度给与box2d的body
 	 * @param slots
 	 */
-	public static void spineToBox2d(Array<Slot> slots){
-		for (Slot slot : slots) {
+	public static void spineToBox2d(Skeleton skeleton){
+		boolean flipx=skeleton.getFlipX();
+		boolean flipy=skeleton.getFlipY();
+		for (Slot slot : skeleton.getSlots()) {
 			if (!(slot.getAttachment() instanceof Box2dBoundingBoxAttachment)) continue;
 			Box2dBoundingBoxAttachment attachment = (Box2dBoundingBoxAttachment)slot.getAttachment();
 			if (attachment.body == null) continue;
-			Skeleton skeleton=slot.getSkeleton();
 			float x = skeleton.getX() + slot.getBone().getWorldX();
 			float y = skeleton.getY() + slot.getBone().getWorldY();
-			float rotation = slot.getBone().getWorldRotation();
-//			System.out.println("body "+x+" "+y);
+			float rotation =flipx? -slot.getBone().getWorldRotation():slot.getBone().getWorldRotation();
+			rotation=flipy?-rotation:rotation;
 			attachment.body.setTransform(x,y,rotation*MathUtils.degRad);
 		}
 	}
@@ -169,6 +188,61 @@ public class Box2dUtil {
 			}
 		}
 		return null;
+	}
+	public static void flipXBody(Skeleton skeleton){
+		boolean flipx=skeleton.getFlipX();
+		boolean flipy=skeleton.getFlipY();
+		SkeletonBounds sb=new SkeletonBounds();
+		Vector2 tmp=new Vector2();
+		sb.update(skeleton, true);
+		for (int i = 0; i < skeleton.getSlots().size; i++) {
+			Slot slot=skeleton.getSlots().get(i);
+			Bone bone=slot.getBone();
+			Attachment attachment=slot.getAttachment();
+			if (attachment instanceof Box2dBoundingBoxAttachment) {
+				Box2dBoundingBoxAttachment bbba=(Box2dBoundingBoxAttachment)attachment;
+				float[] worldVertices=new float[bbba.getVertices().length];
+				float[] newVertices=new float[worldVertices.length];
+				float[] localVertices = bbba.getVertices(); //BoundingBoxAttachment
+	            for (int v = 0 ; v < localVertices.length; v += 2) {
+	                float px = localVertices[v];
+	                float py = localVertices[v + 1];
+	                newVertices[v]=flipx?-px:px;
+	                newVertices[v+1]=flipy?-py:py;
+	             }
+//				bbba.computeWorldVertices(bone, worldVertices);
+//				int vCount=worldVertices.length/2;
+//				for (int j = 0; j < vCount; j++) {
+//					worldVertices[j*2]=(worldVertices[j*2]-bone.getWorldX()-skeleton.getX());
+//					worldVertices[j*2+1]=worldVertices[j*2+1]-bone.getWorldY()-skeleton.getY();
+////					System.out.println(worldVertices[j]);
+//					newVertices[(vCount-j)*2-2]=worldVertices[j*2];  //x
+//					newVertices[(vCount-j)*2-1]=worldVertices[j*2+1]; //y
+//				}
+				BodyDef bodyDef=new BodyDef();
+				World world=bbba.getBody().getWorld();
+//				Body newBody=world.createBody(bodyDef);
+//				bodyDef.type=bbba.body.getType();
+				for (Fixture f:bbba.getBody().getFixtureList()) {
+					float[] vertices=((Box2dBoundingBoxAttachment) attachment).getVertices();
+//					bbba.getBody().getFixtureList().removeValue(f, false);
+					PolygonShape shape=new PolygonShape(); 
+					shape =(PolygonShape) bbba.getBody().getFixtureList().first().getShape();
+					shape.set(newVertices);
+//					shape.set(bbba.getVertices());
+//					bbba.getBody().createFixture(shape, 1);
+//					newBody.createFixture(shape, 1);
+				}
+//				world.destroyBody(bbba.getBody());
+//				bbba.setBody(newBody);
+				float x = skeleton.getX() + slot.getBone().getWorldX();
+				float y = skeleton.getY() + slot.getBone().getWorldY();
+				float rotation = bone.getSkeleton().getFlipX()?-slot.getBone().getWorldRotation():-slot.getBone().getWorldRotation();
+//				rotation=flipy?180+rotation:rotation;
+//				System.out.println("body "+x+" "+y);
+//				newBody.setTransform(x,y,rotation*MathUtils.degRad);
+			}
+		}//end for each slot
 	}
 	public static void updateBody(Skeleton skeleton){
 		for (int i = 0; i < skeleton.getSlots().size; i++) {

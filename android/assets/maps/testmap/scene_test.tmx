@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="1" tilewidth="1080" tileheight="607" nextobjectid="76">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="1" tilewidth="1080" tileheight="607" nextobjectid="86">
  <tileset firstgid="1" name="land1" tilewidth="1051" tileheight="243" tilecount="1">
   <image source="land1.png" width="1051" height="243"/>
  </tileset>
@@ -51,6 +51,9 @@
  </objectgroup>
  <objectgroup name="actors">
   <object id="53" name="goblins-mesh" x="221" y="288">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
    <ellipse/>
   </object>
  </objectgroup>
@@ -63,10 +66,63 @@
    </properties>
    <polyline points="77.3333,-17.3333 227.636,-2.90909 393.576,-19.7576 481.818,-45.4545 562.666,-80.1212 663.031,-80.1212 750.182,-60.9697 818.546,-37.9394 887.879,-27.2727 1093.94,-6.06061 1233.33,3.0303 1390.91,-3.0303 1590.91,-12.1212 1815.15,-39.3939 1896.97,-75.7576 2006.06,-75.7576 2227.27,-63.6364 2412.12,-42.4242 2496.97,-57.5758 2621.21,-54.5455 2793.94,-45.4545 2954.79,-16.3636"/>
   </object>
-  <object id="74" name="b" x="259" y="357" width="87" height="111">
+  <object id="74" name="b" x="403" y="341" width="87" height="111">
    <properties>
     <property name="bodyType" value="d"/>
    </properties>
+  </object>
+  <object id="76" x="108" y="358" width="61" height="82">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+  </object>
+  <object id="77" x="425" y="39" width="64" height="64">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="78" x="343" y="117" width="117" height="117">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="79" x="544" y="217" width="46" height="46">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="80" x="539" y="41" width="22" height="22">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="81" x="223" y="15" width="28" height="28">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="82" x="159" y="10" width="28" height="28">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="83" x="288" y="34" width="19" height="19">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object id="84" x="239" y="56" width="15" height="15">
+   <properties>
+    <property name="bodyType" value="d"/>
+   </properties>
+   <ellipse/>
   </object>
  </objectgroup>
 </map>

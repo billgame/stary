@@ -26,7 +26,7 @@ public class SpineRenderSystem extends EntitySystem {
 	
 	SkeletonRenderer skeletonRenderer;
 	
-	SkeletonRendererDebug debugRenderer;
+	SkeletonRendererDebug skeletonDebugRenderer;
 	Box2DDebugRenderer box2dDebugRenderer;
 	
 	Family family;
@@ -48,11 +48,11 @@ public class SpineRenderSystem extends EntitySystem {
 		skeletonRenderer = new SkeletonRenderer();
 		skeletonRenderer.setPremultipliedAlpha(true);
 		
-		debugRenderer = new SkeletonRendererDebug();
+		skeletonDebugRenderer = new SkeletonRendererDebug();
 //		debugRenderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
-		debugRenderer.setBoundingBoxes(false);
-		debugRenderer.setRegionAttachments(false);
-		debugRenderer.setMeshTriangles(false);
+		skeletonDebugRenderer.setBoundingBoxes(false);
+		skeletonDebugRenderer.setRegionAttachments(false);
+		skeletonDebugRenderer.setMeshTriangles(false);
 		box2dDebugRenderer=new Box2DDebugRenderer();
 	}
 	public void addedToEngine(Engine engine) {
@@ -74,9 +74,9 @@ public class SpineRenderSystem extends EntitySystem {
     		skeletonRenderer.draw(polygonSpriteBatch, sbComponent.skeleton);//渲染spiner
     		polygonSpriteBatch.end();
     		
-    		debugRenderer.getShapeRenderer().setProjectionMatrix(phyStage.getCamera().combined);
-    		debugRenderer.setScale(sbComponent.pxToPhy);
-    		debugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
+    		skeletonDebugRenderer.getShapeRenderer().setProjectionMatrix(phyStage.getCamera().combined);
+    		skeletonDebugRenderer.setScale(sbComponent.pxToPhy);
+    		skeletonDebugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
         }//end for each entity 
         
 		box2dDebugRenderer.render(GameData.box2dWorld, phyStage.getCamera().combined);//渲染box2d debug

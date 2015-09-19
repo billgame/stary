@@ -210,12 +210,12 @@ public class GameScreen extends BasicScreen{
 	public void loadMap(){
 		tiledMap=new TmxMapLoader().load(testmap);
 		layers=tiledMap.getLayers();
-		for (int i = 0; i < layers.getCount(); i++) {
-			MapLayer layer=layers.get(i);
-			System.out.println(layer.getName()+" opacity:"+layer.getOpacity()
-			+" isMaplayer:"+(layer.getClass()==MapLayer.class)+", "
-			+"x objects:"+layer.getObjects().getCount()+" class:"+ layer.getClass().getSimpleName());
-		}
+//		for (int i = 0; i < layers.getCount(); i++) {
+//			MapLayer layer=layers.get(i);
+//			System.out.println(layer.getName()+" opacity:"+layer.getOpacity()
+//			+" isMaplayer:"+(layer.getClass()==MapLayer.class)+", "
+//			+"x objects:"+layer.getObjects().getCount()+" class:"+ layer.getClass().getSimpleName());
+//		}
 		MapLayer layer=layers.get("objectLayer_bill_close2");
 		MapObjects objects=layer.getObjects();
 	}
@@ -224,7 +224,6 @@ public class GameScreen extends BasicScreen{
 	private void initEntityBox2dSpine(MapLayers layers2) {
 		MapLayer actorLayer=layers.get("actors");
 		for(MapObject actorObj:actorLayer.getObjects()){
-			System.out.println(actorObj.getName());
 			String actorName=actorObj.getName();
 			//position in world(meter) [bill]
 			Vector2 pos=TMXUtil.getPosition(actorObj, pxToPhy);
@@ -247,7 +246,6 @@ public class GameScreen extends BasicScreen{
 		};
 		json = new SkeletonJson(al);
 		json.setScale(pxToPhy);
-		System.out.println("create skeletion in scale "+pxToPhy);
 		SkeletonData skeletonData = json.readSkeletonData(Gdx.files.internal(character+name+".json"));
 		Skeleton skeleton=new Skeleton(skeletonData);
 		Vector2 pos=TMXUtil.getPosition(actor,pxToPhy);//get position(in meter) 
@@ -255,7 +253,6 @@ public class GameScreen extends BasicScreen{
 		skeleton.setSkin("goblin");
 //		skeleton.setToSetupPose();
 		skeleton.updateWorldTransform();
-		System.out.println("actor position : "+skeleton.getX()+","+skeleton.getY());
 		
 		AnimationStateData stateData = new AnimationStateData(skeletonData); // Defines mixing (crossfading) between animations.
 //		stateData.setMix("run", "jump", 0.2f);
