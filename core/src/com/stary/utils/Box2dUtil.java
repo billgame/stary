@@ -35,7 +35,6 @@ import com.stary.data.GameData;
 public class Box2dUtil {
 	public static Shape getShape(MapObject mapObject,float pxToPhy){
 		Shape shape = null;
-		System.out.println(mapObject);
 		if (mapObject instanceof TextureMapObject) {
 			
 		}else if(mapObject instanceof RectangleMapObject){
@@ -189,7 +188,7 @@ public class Box2dUtil {
 		}
 		return null;
 	}
-	public static void flipXBody(Skeleton skeleton){
+	public static void updateBody(Skeleton skeleton){
 		boolean flipx=skeleton.getFlipX();
 		boolean flipy=skeleton.getFlipY();
 		SkeletonBounds sb=new SkeletonBounds();
@@ -244,24 +243,24 @@ public class Box2dUtil {
 			}
 		}//end for each slot
 	}
-	public static void updateBody(Skeleton skeleton){
-		for (int i = 0; i < skeleton.getSlots().size; i++) {
-			Slot slot=skeleton.getSlots().get(i);
-			Bone bone=slot.getBone();
-			Attachment attachment=slot.getAttachment();
-			if (attachment instanceof Box2dBoundingBoxAttachment) {
-				Box2dBoundingBoxAttachment bbba=(Box2dBoundingBoxAttachment)attachment;
-				for (Fixture f:bbba.getBody().getFixtureList()) {
-					float[] vertices=((Box2dBoundingBoxAttachment) attachment).getVertices();
-					PolygonShape shape=(PolygonShape)f.getShape();
-					for(int v=0;i<vertices.length;v++){
-					       vertices[v] = vertices[v] - bone.getWorldX();
-					       v++;
-					       vertices[v] = vertices[v] - bone.getWorldY();
-					} 
-					shape.set(vertices);
-				}
-			}
-		}
-	}
+//	public static void updateBody(Skeleton skeleton){
+//		for (int i = 0; i < skeleton.getSlots().size; i++) {
+//			Slot slot=skeleton.getSlots().get(i);
+//			Bone bone=slot.getBone();
+//			Attachment attachment=slot.getAttachment();
+//			if (attachment instanceof Box2dBoundingBoxAttachment) {
+//				Box2dBoundingBoxAttachment bbba=(Box2dBoundingBoxAttachment)attachment;
+//				for (Fixture f:bbba.getBody().getFixtureList()) {
+//					float[] vertices=((Box2dBoundingBoxAttachment) attachment).getVertices();
+//					PolygonShape shape=(PolygonShape)f.getShape();
+//					for(int v=0;i<vertices.length;v++){
+//					       vertices[v] = vertices[v] - bone.getWorldX();
+//					       v++;
+//					       vertices[v] = vertices[v] - bone.getWorldY();
+//					} 
+//					shape.set(vertices);
+//				}
+//			}
+//		}
+//	}
 }

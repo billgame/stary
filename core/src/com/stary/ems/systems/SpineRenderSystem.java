@@ -76,7 +76,7 @@ public class SpineRenderSystem extends EntitySystem {
     		
     		skeletonDebugRenderer.getShapeRenderer().setProjectionMatrix(phyStage.getCamera().combined);
     		skeletonDebugRenderer.setScale(sbComponent.pxToPhy);
-    		skeletonDebugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
+//    		skeletonDebugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
         }//end for each entity 
         
 		box2dDebugRenderer.render(GameData.box2dWorld, phyStage.getCamera().combined);//渲染box2d debug

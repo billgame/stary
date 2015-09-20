@@ -50,7 +50,7 @@
   <object id="28" name="land4" gid="1" x="1948.09" y="634.818" width="1051" height="243"/>
  </objectgroup>
  <objectgroup name="actors">
-  <object id="53" name="goblins-mesh" x="221" y="288">
+  <object id="53" name="goblins-mesh" x="536" y="404">
    <properties>
     <property name="bodyType" value="d"/>
    </properties>

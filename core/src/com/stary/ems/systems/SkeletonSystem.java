@@ -19,6 +19,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.esotericsoftware.spine.AnimationState;
+import com.esotericsoftware.spine.AnimationState.TrackEntry;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
@@ -30,6 +31,7 @@ import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.AttachmentLoader;
 import com.esotericsoftware.spine.attachments.BoundingBoxAttachment;
 import com.stary.data.GameData;
+import com.stary.ems.components.Action;
 import com.stary.ems.components.SkeletonBox2dComponent;
 import com.stary.utils.Box2dBoundingBoxAttachment;
 import com.stary.utils.Box2dUtil;
@@ -68,12 +70,14 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		//FIXME box2d body not correct
 		skeleton.updateWorldTransform();
 		AnimationStateData stateData = new AnimationStateData(skeletonData); // Defines mixing (crossfading) between animations.
-//		stateData.setMix("run", "jump", 0.2f);
+		stateData.setMix("walk", "idle", 0.2f);
+		stateData.setMix("idle", "walk", 0.2f);
 //		stateData.setMix("jump", "run", 0.2f);
 		AnimationState state = new AnimationState(stateData); // Holds the animation state for a skeleton (current animation, time, etc).
 //		state.setTimeScale(0.5f); // Slow all animations down to 50% speed.
 		// Queue animations on track 0.
-		state.setAnimation(0, "walk", true);
+		state.setAnimation(0, "idle", true);
+//		state.addAnimation(0, "walk", false, 5);//idle完后,5秒后walk
 
 		skeletonComponent.skeletonJson=skeletonJson;
 		skeletonComponent.skeletonData=skeletonData;
@@ -110,7 +114,7 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 //			shape.set(bbba.getVertices());
 //			shape.createLoop(worldVertices);
 			BodyDef bodyDef=new BodyDef();
-			bodyDef.type=BodyType.StaticBody;
+			bodyDef.type=BodyType.DynamicBody;
 			FixtureDef actorFixtureDef=new FixtureDef();
 			actorFixtureDef.shape=shape;
 			//TODO [bill]terrian density,friction...will be setting in database manually
@@ -151,17 +155,35 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		animationState.update(deltaTime);
 		animationState.apply(skeleton);
 		
+		float x=skeleton.getX();
+		float y1=skeleton.getY()+deltaTime*GameData.instance.gravity.y/5;
+		float speed=1.4f*deltaTime;// 1.4m per min
+		switch (skeletonComponent.action) {
+		case walk:
+			if (!skeletonComponent.right) {
+				speed=-speed;
+			}
+			x+=speed;
+			GameData.instance.pxStage.getCamera().position.x+=speed/skeletonComponent.pxToPhy;
+			GameData.instance.phyStage.getCamera().position.x+=speed;
+			GameData.instance.phyStage.getCamera().update();
+			GameData.instance.pxStage.getCamera().update();
+			break;
+
+		default:
+			break;
+		}
 		if(GameData.instance.land!=null){
-			Skeleton skl=skeletonComponent.skeleton;
-			float x=skl.getX();
-//			float y1=skl.getY();//skl.getY()+deltaTime*GameData.instance.gravity.y/5;
-			float y1=skl.getY()+deltaTime*GameData.instance.gravity.y/5;
-			float y=Box2dUtil.getLandY(GameData.instance.land, x);
-			if (y1<y) {
+			Float y=Box2dUtil.getLandY(GameData.instance.land, x);
+			if (y==null) {
+				x=skeleton.getX();
+			}else if (y1<y) {
 				y1=y;
 			}
-			skl.setPosition(skl.getX()+0.01f, y1);
+			skeleton.setPosition(x, y1);
 		}
+		TrackEntry te=animationState.getCurrent(0);
+//		System.out.println(te);
 		skeletonComponent.skeleton.updateWorldTransform();
 		
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body

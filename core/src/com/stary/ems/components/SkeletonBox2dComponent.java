@@ -11,6 +11,9 @@ import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonJson;
 
 public class SkeletonBox2dComponent implements Component{
+	public Action action=Action.idle;
+	public Action lastAction=Action.idle;
+	public boolean right=true;
 	public String name;
 	public float pxToPhy;
 	public float x,y;

@@ -61,9 +61,11 @@ import com.esotericsoftware.spine.attachments.RegionAttachment;
 import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import com.stary.data.Assets;
 import com.stary.data.GameData;
+import com.stary.ems.components.CharacterStateComponent;
 import com.stary.ems.components.SkeletonBox2dComponent;
 import com.stary.ems.systems.SkeletonSystem;
 import com.stary.ems.systems.SpineRenderSystem;
+import com.stary.inputs.InputManager;
 import com.stary.utils.AshleyUtil;
 import com.stary.utils.Box2dBoundingBoxAttachment;
 import com.stary.utils.Box2dUtil;
@@ -102,18 +104,17 @@ public class GameScreen extends BasicScreen{
 	
 	World box2dWorld;
 	
-	Array<Body> bodies;
+	InputManager inputManager;
 //	Array<Skeleton> skeletons;
 	
 	TiledMap tiledMap;
-	Stage physicalStage,pxStage;
+	Stage phyStage,pxStage;
 	SpriteBatch phyBatch;
 	public GameScreen(Game game) {
 		super(game);
 	}
 	@Override
 	public void show() {
-		
 		polygonSpriteBatch = new PolygonSpriteBatch(); // Required to render meshes. SpriteBatch can't render meshes.
 		skeletonRenderer = new SkeletonRenderer();
 		skeletonRenderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
@@ -127,13 +128,15 @@ public class GameScreen extends BasicScreen{
 		box2dWorld=GameData.box2dWorld;
 		
 		//(8.5  5.1)(32, 19.2f)
-		physicalStage =new Stage(new FitViewport(mw, mw/screenRatio,cameraMap));
+		phyStage =new Stage(new FitViewport(mw, mw/screenRatio,cameraMap));
 		//(800,480)
-		pxStage= new Stage(new FitViewport(pw, ph), physicalStage.getBatch());
-		phyBatch=(SpriteBatch) physicalStage.getBatch();
+		pxStage= new Stage(new FitViewport(pw, ph), phyStage.getBatch());
+		phyBatch=(SpriteBatch) phyStage.getBatch();
 		
 		GameData.instance.pxStage= pxStage;
-		GameData.instance.phyStage= physicalStage;
+		GameData.instance.phyStage= phyStage;
+		
+		inputManager=new InputManager(this,pxStage,phyStage);
 		super.show();
 
 
@@ -203,7 +206,7 @@ public class GameScreen extends BasicScreen{
 		}
 		pxBatch.end();
 		
-		spineRenderSystem.update(delta);
+		spineRenderSystem.update(delta);// render spine
 		
 	}
 	MapLayers layers;
@@ -229,8 +232,10 @@ public class GameScreen extends BasicScreen{
 			Vector2 pos=TMXUtil.getPosition(actorObj, pxToPhy);
 			Entity actor=
 					AshleyUtil.createActor()
-					.add(new SkeletonBox2dComponent(box2dWorld,actorName,pos.x,pos.y,pxToPhy));
+					.add(new SkeletonBox2dComponent(box2dWorld,actorName,pos.x,pos.y,pxToPhy))
+					.add(new CharacterStateComponent());
 			ashleyEngine.addEntity(actor);
+			GameData.instance.currentCharacter=actor.getId();
 		}
 	}
 	
@@ -250,7 +255,7 @@ public class GameScreen extends BasicScreen{
 		Skeleton skeleton=new Skeleton(skeletonData);
 		Vector2 pos=TMXUtil.getPosition(actor,pxToPhy);//get position(in meter) 
 		skeleton.setPosition(pos.x, pos.y);
-		skeleton.setSkin("goblin");
+		skeleton.setSkin("goblin");//TODO change to var 
 //		skeleton.setToSetupPose();
 		skeleton.updateWorldTransform();
 		
@@ -287,7 +292,6 @@ public class GameScreen extends BasicScreen{
 		
 	}
 	public void createPhyLayer(MapLayers layers){
-		bodies=new Array<Body>();
 		MapLayer box2dLayer=layers.get("physicalLayer");
 		for(MapObject obj:box2dLayer.getObjects()){
 			if (obj instanceof TextureMapObject) continue;
@@ -319,7 +323,7 @@ public class GameScreen extends BasicScreen{
 			fixtureDef.restitution=0.15f;
 			Body body=box2dWorld.createBody(bodyDef);
 			body.createFixture(fixtureDef);
-			bodies.add(body);
+//			bodies.add(body);
 			fixtureDef.shape=null;
 			shape.dispose();
 		}//end for

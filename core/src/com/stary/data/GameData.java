@@ -54,6 +54,7 @@ public class GameData {
 	public float music=1.0f;
 	public float sound=1.0f;
 	public float voice=1.0f;
+	public long currentCharacter=-1;
 	
 //	public Map<String,String> forces_db=new HashMap<String,String>();
 //	public Map<String,UnitData> units_db=new HashMap<String,UnitData>();
