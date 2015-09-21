@@ -4,9 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.graphics.g2d.PolygonSprite;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.esotericsoftware.spine.SkeletonRenderer;
+import com.esotericsoftware.spine.SkeletonRendererDebug;
 
 
 public class GameData {
@@ -28,6 +33,11 @@ public class GameData {
 	
 	public Stage phyStage;
 	public Stage pxStage;
+	public PolygonSpriteBatch polygonSpriteBatch= new PolygonSpriteBatch();
+	public SkeletonRenderer skeletonRenderer = new SkeletonRenderer();
+	public SkeletonRendererDebug skeletonDebugRenderer = new SkeletonRendererDebug();
+	public Box2DDebugRenderer box2dDebugRenderer=new Box2DDebugRenderer();
+//	public PolygonSprite
 	
 	public static Assets assets=Assets.instance;
 	

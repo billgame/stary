@@ -24,30 +24,42 @@
  <tileset firstgid="8" name="forest2" tilewidth="457" tileheight="255" tilecount="1">
   <image source="forest2.png" width="457" height="255"/>
  </tileset>
- <layer name="tileLayer_bill" width="10" height="1" opacity="0.8">
-  <data encoding="base64" compression="zlib">
-   eJxjYCAOAAAAKAAB
-  </data>
- </layer>
- <objectgroup name="objectLayer_bill_distance1">
+ <objectgroup name="objectLayer_bill_distance1" opacity="0.97">
+  <properties>
+   <property name="z" value="0.6"/>
+  </properties>
   <object id="31" name="building1" gid="3" x="238" y="535.333" width="382" height="277.266"/>
  </objectgroup>
  <objectgroup name="objectLayer_bill_close1">
+  <properties>
+   <property name="z" value="0.35"/>
+  </properties>
   <object id="32" name="mountain1" gid="4" x="0" y="500" width="383" height="357.649"/>
   <object id="33" name="mountain2" gid="5" x="531" y="422" width="214.28" height="267"/>
   <object id="43" name="mountain3" gid="2147483652" x="650" y="483" width="603" height="318"/>
  </objectgroup>
  <objectgroup name="objectLayer_bill_close2">
+  <properties>
+   <property name="z" value="0.1"/>
+  </properties>
   <object id="39" name="forest1" gid="7" x="2" y="492" width="421" height="171.98"/>
   <object id="40" name="forest2" gid="8" x="457" y="532" width="457" height="255"/>
   <object id="41" name="forest3" gid="8" x="759.271" y="517" width="381.729" height="213"/>
   <object id="42" name="forest4" gid="7" x="1071" y="499" width="435.738" height="178"/>
  </objectgroup>
- <objectgroup name="objectLayer_bill_land1">
+ <objectgroup name="objectLayer_bill_land">
+  <properties>
+   <property name="z" value="0"/>
+  </properties>
   <object id="24" name="land1" gid="1" x="-171.667" y="645.061" width="1051" height="243"/>
   <object id="26" name="land2" gid="2147483650" x="598.606" y="637.848" width="1052" height="243"/>
   <object id="27" name="land3" gid="2" x="1138" y="643.909" width="1052" height="243"/>
   <object id="28" name="land4" gid="1" x="1948.09" y="634.818" width="1051" height="243"/>
+ </objectgroup>
+ <objectgroup name="objectLayer_bill_fore1">
+  <properties>
+   <property name="z" value="-1"/>
+  </properties>
  </objectgroup>
  <objectgroup name="actors">
   <object id="53" name="goblins-mesh" x="536" y="404">
@@ -57,7 +69,6 @@
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup name="objectLayer_bill_fore1"/>
  <objectgroup name="physicalLayer">
   <object id="22" name="physicalLand" x="-57.1818" y="546.303">
    <properties>

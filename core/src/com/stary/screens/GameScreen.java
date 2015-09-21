@@ -62,7 +62,12 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import com.stary.data.Assets;
 import com.stary.data.GameData;
 import com.stary.ems.components.CharacterStateComponent;
+import com.stary.ems.components.SceneItemComponent;
 import com.stary.ems.components.SkeletonBox2dComponent;
+import com.stary.ems.components.ZComparator;
+import com.stary.ems.components.ZComponent;
+import com.stary.ems.systems.SceneControlSystem;
+import com.stary.ems.systems.SceneRenderSystem;
 import com.stary.ems.systems.SkeletonSystem;
 import com.stary.ems.systems.SpineRenderSystem;
 import com.stary.inputs.InputManager;
@@ -96,8 +101,9 @@ public class GameScreen extends BasicScreen{
 	ShapeRenderer sr=new ShapeRenderer();
 	
 	SpineRenderSystem spineRenderSystem;
+	SceneRenderSystem sceneRenderSystem;
 
-	SkeletonRendererDebug debugRenderer;
+	SkeletonRendererDebug skeletonDebugRenderer;
 	SkeletonRenderer skeletonRenderer;
 	SkeletonJson json;
 	SkeletonBounds skeletonBounds=new  SkeletonBounds();
@@ -115,16 +121,16 @@ public class GameScreen extends BasicScreen{
 	}
 	@Override
 	public void show() {
-		polygonSpriteBatch = new PolygonSpriteBatch(); // Required to render meshes. SpriteBatch can't render meshes.
-		skeletonRenderer = new SkeletonRenderer();
+		polygonSpriteBatch = GameData.instance.polygonSpriteBatch; // Required to render meshes. SpriteBatch can't render meshes.
+		skeletonRenderer = GameData.instance.skeletonRenderer;
 		skeletonRenderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
-		debugRenderer = new SkeletonRendererDebug();
+		skeletonDebugRenderer = GameData.instance.skeletonDebugRenderer;
 //		debugRenderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
-		debugRenderer.setBoundingBoxes(false);
-		debugRenderer.setRegionAttachments(false);
-		debugRenderer.setMeshTriangles(false);
+		skeletonDebugRenderer.setBoundingBoxes(false);
+		skeletonDebugRenderer.setRegionAttachments(false);
+		skeletonDebugRenderer.setMeshTriangles(false);
 		
-		box2dDebugRenderer=new Box2DDebugRenderer();
+		box2dDebugRenderer=GameData.instance.box2dDebugRenderer;
 		box2dWorld=GameData.box2dWorld;
 		
 		//(8.5  5.1)(32, 19.2f)
@@ -142,12 +148,18 @@ public class GameScreen extends BasicScreen{
 
 		ashleyEngine=GameData.ashley;
 		
-		Family f=Family.all(SkeletonBox2dComponent.class).get();
-		SkeletonSystem skeletonSystem= new SkeletonSystem(f);
-		spineRenderSystem=new SpineRenderSystem(f);
-		ashleyEngine.addEntityListener(Family.all(SkeletonBox2dComponent.class).get(),skeletonSystem);
+		Family SkeletonBox2dComponentFamily=Family.all(SkeletonBox2dComponent.class).get();
+		Family sceneFamily=Family.all(ZComponent.class,SceneItemComponent.class).get();
+		
+		SkeletonSystem skeletonSystem= new SkeletonSystem(SkeletonBox2dComponentFamily);
+		SceneControlSystem SceneControlSystem=new SceneControlSystem(sceneFamily);
+		sceneRenderSystem=new SceneRenderSystem(sceneFamily, new ZComparator());
+		spineRenderSystem=new SpineRenderSystem(SkeletonBox2dComponentFamily);
+		ashleyEngine.addEntityListener(SkeletonBox2dComponentFamily,skeletonSystem);
 		ashleyEngine.addSystem(skeletonSystem);
-		ashleyEngine.addSystem(spineRenderSystem);
+		ashleyEngine.addSystem(SceneControlSystem);
+		ashleyEngine.addSystem(sceneRenderSystem);//not process by ashley
+		ashleyEngine.addSystem(spineRenderSystem);//not process by ashley
 		
 		loadMap();
 //		System.out.println(tiledMap.getLayers().get("physicalLayer"));
@@ -157,25 +169,26 @@ public class GameScreen extends BasicScreen{
 	@Override
 	public void render(float delta) {
 
-		box2dWorld.step(delta, 6, 2);
-		
-		ashley.update(delta);
-		
+		box2dWorld.step(delta, 6, 2);	//update box2d
+		ashley.update(delta);			//update logic system
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 //		super.render(delta);
-		SpriteBatch pxBatch=(SpriteBatch) pxStage.getBatch();
-		pxBatch.setProjectionMatrix(pxStage.getCamera().combined);
-		pxBatch.begin();
+		sceneRenderSystem.update(delta);	//render scene
+		spineRenderSystem.update(delta);	// render spine
+		
+	}
+	MapLayers layers;
+	public void loadMap(){
+		tiledMap=new TmxMapLoader().load(testmap);
+		layers=tiledMap.getLayers();
 		//draw map layers
 		for (int i = 0; i < layers.getCount(); i++) {
 			MapLayer layer=layers.get(i);
-			//if it has some object ,it's an objectslayer
-//			if (!layer.getName().equals("objectLayer_bill_close1"))
-//				continue;
-			if(layer.getName().startsWith("physicalLayer")){
-				continue;
-			}
+			String z=layer.getProperties().get("z",String.class);
+			if (z==null) continue;//fiter other layer ,leave about scene layer
+			//-1 is the top layer
+			float layerZ=Float.valueOf(layer.getProperties().get("z","-1",String.class));
 			MapObjects objs=layer.getObjects();
 			for (int j = 0; j < objs.getCount(); j++) {
 				MapObject obj=objs.get(j);
@@ -185,42 +198,28 @@ public class GameScreen extends BasicScreen{
 				if (obj instanceof TextureMapObject) {
 					TextureMapObject texObj=(TextureMapObject)obj;
 					TextureRegion region=texObj.getTextureRegion();
-//					float w=texObj.getProperties().get("width",0.0f,Float.class);//scaled width
-//					float h=texObj.getProperties().get("height",0.0f,Float.class);//scaled height
-					pxBatch.draw(region,texObj.getX(), texObj.getY(),
-							texObj.getOriginX(), texObj.getOriginY(), 
-							region.getRegionWidth(),region.getRegionHeight(),
-							texObj.getScaleX(),texObj.getScaleY(),
-							-texObj.getRotation());
-					//same as above...[bill]
-//					pxBatch.draw(region,texObj.getX(), texObj.getY(),
-//							texObj.getOriginX(), texObj.getOriginY(), 
-//							w,h,1,1,-texObj.getRotation());
-					//same as above...[bill]
-//					Affine2 a=new Affine2();
-//					a.translate(texObj.getX(),texObj.getY());//second translates 
-//					a.rotate(-texObj.getRotation());	//first rotates at world orgin
-//					pxBatch.draw(region, w, h, a);
-				}
-			}
-		}
-		pxBatch.end();
-		
-		spineRenderSystem.update(delta);// render spine
-		
-	}
-	MapLayers layers;
-	public void loadMap(){
-		tiledMap=new TmxMapLoader().load(testmap);
-		layers=tiledMap.getLayers();
-//		for (int i = 0; i < layers.getCount(); i++) {
-//			MapLayer layer=layers.get(i);
-//			System.out.println(layer.getName()+" opacity:"+layer.getOpacity()
-//			+" isMaplayer:"+(layer.getClass()==MapLayer.class)+", "
-//			+"x objects:"+layer.getObjects().getCount()+" class:"+ layer.getClass().getSimpleName());
-//		}
-		MapLayer layer=layers.get("objectLayer_bill_close2");
-		MapObjects objects=layer.getObjects();
+					ZComponent zComponent=new ZComponent(layerZ, false);
+					SceneItemComponent itemComponent= new SceneItemComponent();
+					itemComponent.name= texObj.getName();
+					itemComponent.isVisable=texObj.isVisible();
+					itemComponent.textureMapObject=texObj;
+					itemComponent.region=region;
+					itemComponent.x=texObj.getX()*pxToPhy;
+					itemComponent.y=texObj.getY()*pxToPhy;
+					itemComponent.originX=texObj.getOriginX();
+					itemComponent.originY=texObj.getOriginY();
+					itemComponent.z=layerZ;
+					itemComponent.regionWidth=region.getRegionWidth()*pxToPhy;
+					itemComponent.regionHeight=region.getRegionHeight()*pxToPhy;
+					itemComponent.scaleX=texObj.getScaleX();
+					itemComponent.scaleY=texObj.getScaleY();
+					itemComponent.rotatioin=texObj.getRotation();
+					Entity itemEntity=AshleyUtil.createSceneItem();
+					itemEntity.add(itemComponent).add(zComponent);
+					ashley.addEntity(itemEntity);
+				}//end if TextureMapObject
+			}//end for each objects
+		}//end for each layers
 	}
 	
 
@@ -232,7 +231,8 @@ public class GameScreen extends BasicScreen{
 			Vector2 pos=TMXUtil.getPosition(actorObj, pxToPhy);
 			Entity actor=
 					AshleyUtil.createActor()
-					.add(new SkeletonBox2dComponent(box2dWorld,actorName,pos.x,pos.y,pxToPhy))
+					.add(new ZComponent(0.1f,true))
+					.add(new SkeletonBox2dComponent(actorName,pos.x,pos.y))
 					.add(new CharacterStateComponent());
 			ashleyEngine.addEntity(actor);
 			GameData.instance.currentCharacter=actor.getId();

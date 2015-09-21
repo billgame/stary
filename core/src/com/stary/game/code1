@@ -19,3 +19,49 @@ entry.setListener(new AnimationStateAdapter() {
 
 
  EarClippingTriangulator 
+ 
+ 
+ 
+ //下面代码从GameScreen.render()方法中去除了:
+ 
+		SpriteBatch pxBatch=(SpriteBatch) pxStage.getBatch();
+		pxBatch.setProjectionMatrix(pxStage.getCamera().combined);
+		pxBatch.begin();
+		//draw map layers
+		for (int i = 0; i < layers.getCount(); i++) {
+			MapLayer layer=layers.get(i);
+			//if it has some object ,it's an objectslayer
+//			if (!layer.getName().equals("objectLayer_bill_close1"))
+//				continue;
+			if(layer.getName().startsWith("physicalLayer")){
+				continue;
+			}
+			MapObjects objs=layer.getObjects();
+			for (int j = 0; j < objs.getCount(); j++) {
+				MapObject obj=objs.get(j);
+//				if(j==1)break;
+//				if (!(obj.getName().equals("mountain1"))) continue;
+				if(!obj.isVisible()) continue;
+				if (obj instanceof TextureMapObject) {
+					TextureMapObject texObj=(TextureMapObject)obj;
+					TextureRegion region=texObj.getTextureRegion();
+//					float w=texObj.getProperties().get("width",0.0f,Float.class);//scaled width
+//					float h=texObj.getProperties().get("height",0.0f,Float.class);//scaled height
+//					pxBatch.draw(region,texObj.getX(), texObj.getY(),
+//							texObj.getOriginX(), texObj.getOriginY(), 
+//							region.getRegionWidth(),region.getRegionHeight(),
+//							texObj.getScaleX(),texObj.getScaleY(),
+//							-texObj.getRotation());
+					//same as above...[bill]
+//					pxBatch.draw(region,texObj.getX(), texObj.getY(),
+//							texObj.getOriginX(), texObj.getOriginY(), 
+//							w,h,1,1,-texObj.getRotation());
+					//same as above...[bill]
+//					Affine2 a=new Affine2();
+//					a.translate(texObj.getX(),texObj.getY());//second translates 
+//					a.rotate(-texObj.getRotation());	//first rotates at world orgin
+//					pxBatch.draw(region, w, h, a);
+				}
+			}
+		}
+		pxBatch.end();

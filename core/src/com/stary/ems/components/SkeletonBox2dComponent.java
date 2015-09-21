@@ -9,6 +9,7 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonJson;
+import com.stary.data.GameData;
 
 public class SkeletonBox2dComponent implements Component{
 	public Action action=Action.idle;
@@ -23,10 +24,10 @@ public class SkeletonBox2dComponent implements Component{
 	public SkeletonData skeletonData;
 	public AnimationState animationState;
 	public AnimationStateData animationStateData;
-	public SkeletonBox2dComponent(World box2dWorld,String name,float x,float y,float scale){
-		this.box2dWorld=box2dWorld;
+	public SkeletonBox2dComponent(String name,float x,float y){
+		this.box2dWorld=GameData.box2dWorld;
 		this.name=name;
-		this.pxToPhy=scale;
+		this.pxToPhy=GameData.pxToPhy;
 		this.x=x;
 		this.y=y;
 	}

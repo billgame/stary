@@ -157,17 +157,14 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 		
 		float x=skeleton.getX();
 		float y1=skeleton.getY()+deltaTime*GameData.instance.gravity.y/5;
-		float speed=1.4f*deltaTime;// 1.4m per min
+		float speed=2*1.4f*deltaTime;// 1.4m per min
 		switch (skeletonComponent.action) {
 		case walk:
 			if (!skeletonComponent.right) {
 				speed=-speed;
 			}
 			x+=speed;
-			GameData.instance.pxStage.getCamera().position.x+=speed/skeletonComponent.pxToPhy;
-			GameData.instance.phyStage.getCamera().position.x+=speed;
-			GameData.instance.phyStage.getCamera().update();
-			GameData.instance.pxStage.getCamera().update();
+
 			break;
 
 		default:
@@ -177,13 +174,18 @@ public class SkeletonSystem extends IteratingSystem implements EntityListener{
 			Float y=Box2dUtil.getLandY(GameData.instance.land, x);
 			if (y==null) {
 				x=skeleton.getX();
+				this.getEngine().removeEntity(entity);
 			}else if (y1<y) {
 				y1=y;
 			}
 			skeleton.setPosition(x, y1);
 		}
+		if (GameData.instance.currentCharacter==entity.getId()) {
+			GameData.instance.phyStage.getCamera().position.x=skeleton.getX();
+			GameData.instance.phyStage.getCamera().position.y=skeleton.getY()+2f;
+		}
+		GameData.instance.phyStage.getCamera().update();
 		TrackEntry te=animationState.getCurrent(0);
-//		System.out.println(te);
 		skeletonComponent.skeleton.updateWorldTransform();
 		
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body
