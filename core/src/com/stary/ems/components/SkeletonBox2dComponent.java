@@ -12,9 +12,10 @@ import com.esotericsoftware.spine.SkeletonJson;
 import com.stary.data.GameData;
 
 public class SkeletonBox2dComponent implements Component{
-	public Action action=Action.idle;
-	public Action lastAction=Action.idle;
-	public boolean right=true;
+//	public Action action=Action.idle;
+//	public Action lastAction=Action.idle;
+//	public boolean right=true;
+//	public float jumpForce;
 	public String name;
 	public float pxToPhy;
 	public float x,y;

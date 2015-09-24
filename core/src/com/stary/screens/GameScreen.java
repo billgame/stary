@@ -68,7 +68,7 @@ import com.stary.ems.components.ZComparator;
 import com.stary.ems.components.ZComponent;
 import com.stary.ems.systems.SceneControlSystem;
 import com.stary.ems.systems.SceneRenderSystem;
-import com.stary.ems.systems.SkeletonSystem;
+import com.stary.ems.systems.SkeletonControlSystem;
 import com.stary.ems.systems.SpineRenderSystem;
 import com.stary.inputs.InputManager;
 import com.stary.utils.AshleyUtil;
@@ -151,7 +151,7 @@ public class GameScreen extends BasicScreen{
 		Family SkeletonBox2dComponentFamily=Family.all(SkeletonBox2dComponent.class).get();
 		Family sceneFamily=Family.all(ZComponent.class,SceneItemComponent.class).get();
 		
-		SkeletonSystem skeletonSystem= new SkeletonSystem(SkeletonBox2dComponentFamily);
+		SkeletonControlSystem skeletonSystem= new SkeletonControlSystem(SkeletonBox2dComponentFamily);
 		SceneControlSystem SceneControlSystem=new SceneControlSystem(sceneFamily);
 		sceneRenderSystem=new SceneRenderSystem(sceneFamily, new ZComparator());
 		spineRenderSystem=new SpineRenderSystem(SkeletonBox2dComponentFamily);
