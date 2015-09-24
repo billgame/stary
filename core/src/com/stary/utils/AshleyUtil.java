@@ -9,4 +9,7 @@ public class AshleyUtil {
 	public static Entity createActor(){
 		return new Entity();
 	}
+	public static Entity createSceneItem(){
+		return new Entity();
+	}
 }

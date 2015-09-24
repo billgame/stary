@@ -44,16 +44,16 @@ public class SpineRenderSystem extends EntitySystem {
 		
 		phyStage=GameData.instance.phyStage;
 		
-		polygonSpriteBatch = new PolygonSpriteBatch(); // Required to render meshes. SpriteBatch can't render meshes.
-		skeletonRenderer = new SkeletonRenderer();
+		polygonSpriteBatch =GameData.instance.polygonSpriteBatch;// new PolygonSpriteBatch(); // Required to render meshes. SpriteBatch can't render meshes.
+		skeletonRenderer = GameData.instance.skeletonRenderer;
 		skeletonRenderer.setPremultipliedAlpha(true);
 		
-		skeletonDebugRenderer = new SkeletonRendererDebug();
+		skeletonDebugRenderer = GameData.instance.skeletonDebugRenderer;
 //		debugRenderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
 		skeletonDebugRenderer.setBoundingBoxes(false);
 		skeletonDebugRenderer.setRegionAttachments(false);
 		skeletonDebugRenderer.setMeshTriangles(false);
-		box2dDebugRenderer=new Box2DDebugRenderer();
+		box2dDebugRenderer= GameData.instance.box2dDebugRenderer;
 	}
 	public void addedToEngine(Engine engine) {
         entities = engine.getEntitiesFor(family);
@@ -62,21 +62,19 @@ public class SpineRenderSystem extends EntitySystem {
 
     public void update(float deltaTime) {
 //		box2dWorld.step(delta, 6, 2);
+		polygonSpriteBatch.setProjectionMatrix(phyStage.getCamera().combined);
         for (int i = 0; i < entities.size(); ++i) {
             Entity entity = entities.get(i);
             SkeletonBox2dComponent sbComponent = skeletonBox2dComponents.get(entity); 
-
-//    		skeletons.first().updateWorldTransform();
     		
 //    		phyBatch.setProjectionMatrix(physicalStage.getCamera().combined);
-    		polygonSpriteBatch.setProjectionMatrix(phyStage.getCamera().combined);
     		polygonSpriteBatch.begin();
     		skeletonRenderer.draw(polygonSpriteBatch, sbComponent.skeleton);//渲染spiner
     		polygonSpriteBatch.end();
     		
     		skeletonDebugRenderer.getShapeRenderer().setProjectionMatrix(phyStage.getCamera().combined);
     		skeletonDebugRenderer.setScale(sbComponent.pxToPhy);
-//    		skeletonDebugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
+    		skeletonDebugRenderer.draw(sbComponent.skeleton);			//渲染spiner debug
         }//end for each entity 
         
 		box2dDebugRenderer.render(GameData.box2dWorld, phyStage.getCamera().combined);//渲染box2d debug
