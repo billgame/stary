@@ -24,7 +24,7 @@ public class GameData {
 	
 	public final static float pxToPhy=viewPortMeterWidth/viewPortPixelWidth;//how much meter per pixel , multiply
 
-	public static Vector2 gravity=new Vector2(0,-10);
+	public static Vector2 gravity=new Vector2(0,-5);
 	
 	public final static Engine ashley = new Engine();
 	public final static World box2dWorld = new World(gravity, true);

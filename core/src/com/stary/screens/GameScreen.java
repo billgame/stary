@@ -62,6 +62,7 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import com.stary.data.Assets;
 import com.stary.data.GameData;
 import com.stary.ems.components.CharacterStateComponent;
+import com.stary.ems.components.JoystickComponent;
 import com.stary.ems.components.SceneItemComponent;
 import com.stary.ems.components.SkeletonBox2dComponent;
 import com.stary.ems.components.ZComparator;
@@ -148,7 +149,8 @@ public class GameScreen extends BasicScreen{
 
 		ashleyEngine=GameData.ashley;
 		
-		Family SkeletonBox2dComponentFamily=Family.all(SkeletonBox2dComponent.class).get();
+		Family SkeletonBox2dComponentFamily=Family.all(CharacterStateComponent.class,
+				JoystickComponent.class,SkeletonBox2dComponent.class).get();
 		Family sceneFamily=Family.all(ZComponent.class,SceneItemComponent.class).get();
 		
 		SkeletonControlSystem skeletonSystem= new SkeletonControlSystem(SkeletonBox2dComponentFamily);
@@ -233,6 +235,7 @@ public class GameScreen extends BasicScreen{
 					AshleyUtil.createActor()
 					.add(new ZComponent(0.1f,true))
 					.add(new SkeletonBox2dComponent(actorName,pos.x,pos.y))
+					.add(new JoystickComponent())
 					.add(new CharacterStateComponent());
 			ashleyEngine.addEntity(actor);
 			GameData.instance.currentCharacter=actor.getId();
