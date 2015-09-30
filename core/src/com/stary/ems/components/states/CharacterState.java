@@ -196,6 +196,7 @@ public enum CharacterState implements State<Entity> {
 //				te.setTime(10);
 //				te.setEndTime(40);
 			}
+			stateComponent.velocity.x*=0.5f;
 			System.out.println("enter atk");
 		}
 
@@ -235,6 +236,7 @@ public enum CharacterState implements State<Entity> {
 		}//end update
 		
 	},
+	/*防守状态*/
 	BlockState(){
 
 		@Override
@@ -276,6 +278,7 @@ public enum CharacterState implements State<Entity> {
 		
 		
 	},
+	/*下蹲状态*/
 	SquatState(){
 
 		@Override
@@ -319,7 +322,7 @@ public enum CharacterState implements State<Entity> {
 			if (joystick.jumpKey) {//
 				return JumpState;
 			}else
-			if (joystick.upKey) {
+			if (joystick.upKey||!joystick.downKey) {
 				return IdleState;
 			}else if ((joystick.rightKey|joystick.leftKey) 
 					&& !(joystick.rightKey&&joystick.leftKey) ) {
@@ -360,7 +363,7 @@ public enum CharacterState implements State<Entity> {
 			if (joystick.jumpKey) {
 				return JumpState;
 			}else
-			if (joystick.downKey) {
+			if (joystick.downKey||!joystick.upKey) {
 				return IdleState;
 			}else if ((joystick.rightKey|joystick.leftKey) 
 					&& !(joystick.rightKey&&joystick.leftKey) ) {

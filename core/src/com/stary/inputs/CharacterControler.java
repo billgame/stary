@@ -80,7 +80,7 @@ public class CharacterControler  implements InputProcessor{
 				state.state=State.down;
 			}
 			break;
-		case Keys.SPACE://jump
+		case Keys.NUMPAD_0://jump
 			joystick.jumpKey=true;
 			joystick.justPressedJump=true;
 			if (state.state!=State.atk && state.state!=State.down) {
@@ -90,14 +90,14 @@ public class CharacterControler  implements InputProcessor{
 				state.state=State.jump;
 			}
 			break;
-		case Keys.J://attack
+		case Keys.NUMPAD_1://attack
 			joystick.OKey=true;//block状态由System判断。
 			joystick.justPressedO=true;
 //			if (state.state!=State.block) {
 //				state.state=State.atk;
 //			}
 			break;
-		case Keys.NUMPAD_0://cancel
+		case Keys.NUMPAD_2://cancel
 			joystick.XKey=true;
 			joystick.justPressedX=true;
 			break;
@@ -144,10 +144,10 @@ public class CharacterControler  implements InputProcessor{
 				state.state=State.idle;
 			}
 			break;
-		case Keys.SPACE://jump
+		case Keys.NUMPAD_0://jump
 			joystick.jumpKey=false;
 			break;
-		case Keys.J://attack
+		case Keys.NUMPAD_1://attack
 			joystick.OKey=false;
 //			if (state.state!=State.block) {
 //				float duration=state.OpressedDuration;
