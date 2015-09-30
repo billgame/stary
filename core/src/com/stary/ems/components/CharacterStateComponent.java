@@ -4,7 +4,10 @@
 package com.stary.ems.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
+import com.stary.ems.components.states.CharacterState;
+import com.stary.ems.components.states.CharacterStateMachine;
 
 public class CharacterStateComponent implements Component {
 	public String name="";
@@ -17,10 +20,14 @@ public class CharacterStateComponent implements Component {
 	public float jumpVelocity=5;
 	public Vector2 velocity=new Vector2();
 	public int jumpTime=0;//记录跳跃次数，实现2级跳跃
+	public int atkNum=1;//
+//	public float atkPressedIntrval=0.35f;
 	
 //	public long state=0;//记录角色状态
 	public State state=State.idle;
 	
+	public CharacterState cState=CharacterState.AtkState;
+	public CharacterStateMachine stateMachine;
 	public enum State {
 		idle,walk,up,down,sidetep,atk,jump,block
 	}
@@ -42,7 +49,8 @@ public class CharacterStateComponent implements Component {
 //	public boolean OKey=false;
 //	public boolean XKey=false;
 //	public boolean jumpKey=false;
-	public float atkDuration;
+	public float OpressedDuration;
+	public float OpressedTimes;
 
 //	public final static long leftKey=1<<1;
 //	public final static long rightKey=1<<2;
@@ -52,7 +60,10 @@ public class CharacterStateComponent implements Component {
 //	public final static long XKey=1<<6;
 //	public final static long jumpKey=1<<7;
 	public static long keys=0;
-	
+	public CharacterStateComponent(Entity entity){
+		stateMachine=new CharacterStateMachine(entity);
+		stateMachine.setInitialState(CharacterState.IdleState);
+	}
 	public static void main(String[] args) {
 //		System.out.println("idle "+idleState);
 //		System.out.println("walk "+walkState);

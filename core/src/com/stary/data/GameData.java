@@ -66,6 +66,8 @@ public class GameData {
 	public float voice=1.0f;
 	public long currentCharacter=-1;
 	
+	public float atkThreshold=0.75f;
+	public float atkComboInterval=0.35f;
 //	public Map<String,String> forces_db=new HashMap<String,String>();
 //	public Map<String,UnitData> units_db=new HashMap<String,UnitData>();
 //	public Map<String,WeaponData> weapons_db=new HashMap<String,WeaponData>();

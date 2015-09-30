@@ -7,6 +7,17 @@ import com.badlogic.ashley.core.Component;
 
 public class JoystickComponent implements Component{
 
+	
+	public final static long key_left=1<<1;
+	public final static long key_right=1<<2;
+	public final static long key_up=1<<3;
+	public final static long key_down=1<<4;
+	public final static long key_O=1<<5;
+	public final static long key_X=1<<6;
+	public final static long key_jump=1<<7;
+	
+	public long keys=0;
+	
 	public boolean leftKey=false;
 	public boolean rightKey=false;
 	public boolean upKey=false;

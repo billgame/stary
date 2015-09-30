@@ -173,114 +173,33 @@ public class SkeletonControlSystem extends IteratingSystem implements EntityList
 
 		Vector2 velocity=stateComponent.velocity;
 		State lastState=stateComponent.state;
-		for(int i=0, times=1;i<times;i++)
-		switch (stateComponent.state) {
-		case walk:
-//			if (te!=null && !"walk".equals(te.getAnimation().getName())) {
-			if(joystickComponent.justPressedLeft||joystickComponent.justPressedRight){
-				//进入walk
-				skeletonComponent.animationState.setAnimation(0, "walk", true);
-				System.out.println("set walk anim");
-			}
-			if (joystickComponent.leftKey&&joystickComponent.rightKey) { //左右键都按下
-				stateComponent.state=State.idle;
-				times++;
-				break;
-			}else if(joystickComponent.OKey){//跑+攻
-				stateComponent.state=State.atk;
-				times++;	//because switched state ,for next one more time
-			}else if(joystickComponent.justPressedJump){//跑+跳
-				stateComponent.state=State.jump;
-				times++;
-			}
-			if (joystickComponent.rightKey) {
-				if (skeleton.getFlipX()) {
-					skeleton.setFlipX(false);
-					Box2dUtil.updateBody(skeleton);
-				}
-				velocity.x=1.4f;//TODO 加入加速度x
-			}else if(joystickComponent.leftKey){
-				if (!skeleton.getFlipX()) {
-					skeleton.setFlipX(true);
-					Box2dUtil.updateBody(skeleton);
-				}
-				velocity.x=-1.4f;
-			}
-			break;
-		case jump:
-			System.out.println("jumping ,times:" +stateComponent.jumpTime);
-//			if (te!=null && !"idle".equals(te.getAnimation().getName())) {
-			if (joystickComponent.justPressedJump&& stateComponent.jumpTime<3) {
-				//进入walk
-				skeletonComponent.animationState.setAnimation(0, "jump", false);
-//				skeletonComponent.animationState.setAnimation(0, "fall", true);
-				if (stateComponent.jumpTime==2) {
-					stateComponent.velocity.y=0;
-					stateComponent.velocity.y+=1.2f*stateComponent.jumpVelocity;
-					stateComponent.jumpTime++;
-					System.out.println("jump plus");
-				}else{
-					stateComponent.velocity.y+=stateComponent.jumpVelocity;
-					System.out.println("jump one");
-				}
-			}
-			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
-			Float charY=skeleton.getY();
-			Float dy=charY-landY;
-//			System.out.println("chary:"+charY+" landY:"+landY);
-			if (joystickComponent.OKey&&dy>=0.3) {
-				stateComponent.state=State.atk;//设置攻击类型是空击
-				stateComponent.jumpTime=0;
-				//TODO 根据角色空中位置与攻击角度，计算出velocity
-			}
-			velocity.y+=deltaTime*GameData.instance.gravity.y;
-			if (velocity.y<0) {
-				skeletonComponent.animationState.setAnimation(0, "fall", true);
-			}
-//			if (charY>landY) {
-//				System.out.println(1+" v.y"+velocity.y);
-//				//jumping 
-////				velocity.y+=deltaTime*GameData.instance.gravity.y;
-////				stateComponent.jumpVelocity+=deltaTime*GameData.instance.gravity.y;
-//			}else
-			if(MathUtils.isEqual(charY, landY)&&!joystickComponent.justPressedJump){//着地
-				System.out.println(2);
-				velocity.y=0;
-				stateComponent.jumpTime=0;
-				if (joystickComponent.rightKey||joystickComponent.leftKey) {
-					
-				}
-				stateComponent.state=State.idle;
-				skeletonComponent.animationState.setAnimation(0, "idle", true);
-				System.out.println("jump->idle");
-				times++;
-				break;
-			}
-			if (velocity.y<0) {
-				//falling
-				
-			}
-			
-			break;
-		case idle:
-			velocity.x=0;
-			if (!(joystickComponent.leftKey&&joystickComponent.rightKey)&&
-					(joystickComponent.leftKey||joystickComponent.rightKey)
-					/*&& !joystickComponent.jumpKey*/) {
-				stateComponent.state=State.walk;
-				skeletonComponent.animationState.setAnimation(0, "walk", true);
-				System.out.println("idle->walk");
-				times++;
-				break;
-			}
-			te=animationState.getCurrent(0);
-			if (te!=null && !"idle".equals(te.getAnimation().getName())) {
-				//进入walk
-				skeletonComponent.animationState.setAnimation(0, "idle", true);
-			}
-		default:
-			break;
+		
+		stateComponent.stateMachine.update();
+		
+		
+		if (joystickComponent.OKey 
+				&& stateComponent.OpressedDuration < GameData.instance.atkThreshold) {
+			stateComponent.OpressedDuration+=deltaTime;
+		}else if (joystickComponent.OKey 
+				&& stateComponent.OpressedDuration > GameData.instance.atkThreshold) {
+//			stateComponent.OpressedDuration=0;  //符合防守状态
+//			stateComponent.OpressedTimes=0;//
+		}else if (!joystickComponent.OKey 
+				&& stateComponent.OpressedDuration > GameData.instance.atkThreshold) {
+			stateComponent.OpressedDuration=0;  //解除防守状态
+			stateComponent.OpressedTimes=0;//
+		}else if (!joystickComponent.OKey&&stateComponent.OpressedDuration>0
+					&&stateComponent.OpressedDuration < GameData.instance.atkThreshold
+					&& stateComponent.OpressedTimes==0) {
+			stateComponent.OpressedTimes=1;//首次攻击
+			stateComponent.OpressedDuration=0;
 		}
+//		else if(!joystickComponent.OKey&&stateComponent.OpressedDuration>0
+//					&&stateComponent.OpressedDuration <= GameData.instance.atkComboInterval
+//					&& stateComponent.OpressedTimes!=0){
+//			stateComponent.OpressedTimes++;//进行连击
+//			stateComponent.OpressedDuration=0;//重计有效时间
+//		}
 		
 //		System.out.println(stateComponent.jumpTime);
 //		System.out.println(stateComponent.state);
@@ -298,7 +217,7 @@ public class SkeletonControlSystem extends IteratingSystem implements EntityList
 //				this.getEngine().removeEntity(entity);
 			}else if (y<landY) {
 				y=landY;
-				velocity.y=0;
+//				velocity.y=0;
 //				System.out.println(2);
 			}else if(y>landY){
 				velocity.y+=GameData.gravity.y*deltaTime;
@@ -317,7 +236,7 @@ public class SkeletonControlSystem extends IteratingSystem implements EntityList
 		//spine 2 box2d 按spine skeleton所有boundingbox的位置，角度给与box2d的body
 		Box2dUtil.spineToBox2d(skeleton);
 //		Box2dUtil.box2dToSpine(skeletonComponent.skeleton.getSlots());
-		joystickComponent.reset();
+		joystickComponent.reset();//重要
 	}
 	public static void main(String[] args) {
 		int a=1;

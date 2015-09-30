@@ -149,10 +149,14 @@ public class CharacterControler  implements InputProcessor{
 			break;
 		case Keys.J://attack
 			joystick.OKey=false;
-			if (state.state!=State.block) {
-				float duration=state.atkDuration;
-				state.state=State.atk;
-			}
+//			if (state.state!=State.block) {
+//				float duration=state.OpressedDuration;
+//				System.out.println(duration);
+//				if (duration<0.3f) {
+//					state.state=State.atk;
+////					state.atkDuration=0;
+//				}
+//			}
 			break;
 //		case Keys.K://cancel
 //			state.XKey=false;

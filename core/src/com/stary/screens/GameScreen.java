@@ -67,6 +67,7 @@ import com.stary.ems.components.SceneItemComponent;
 import com.stary.ems.components.SkeletonBox2dComponent;
 import com.stary.ems.components.ZComparator;
 import com.stary.ems.components.ZComponent;
+import com.stary.ems.components.states.CharacterStateMachine;
 import com.stary.ems.systems.SceneControlSystem;
 import com.stary.ems.systems.SceneRenderSystem;
 import com.stary.ems.systems.SkeletonControlSystem;
@@ -231,14 +232,13 @@ public class GameScreen extends BasicScreen{
 			String actorName=actorObj.getName();
 			//position in world(meter) [bill]
 			Vector2 pos=TMXUtil.getPosition(actorObj, pxToPhy);
-			Entity actor=
-					AshleyUtil.createActor()
-					.add(new ZComponent(0.1f,true))
+			Entity actor= AshleyUtil.createActor();
+			actor.add(new ZComponent(0.1f,true))
 					.add(new SkeletonBox2dComponent(actorName,pos.x,pos.y))
 					.add(new JoystickComponent())
-					.add(new CharacterStateComponent());
+					.add(new CharacterStateComponent(actor));
 			ashleyEngine.addEntity(actor);
-			GameData.instance.currentCharacter=actor.getId();
+			GameData.instance.currentCharacter=actor.getId();//TODO fixed it
 		}
 	}
 	
