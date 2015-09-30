@@ -111,7 +111,7 @@ public enum CharacterState implements State<Entity> {
 				//防守状态
 				return BlockState;
 			}else
-			if(state.OpressedTimes==1){
+			if(state.combo==1){
 					return AtkState;
 				}
 //			if (!joystick.OKey&& state.OpressedDuration!=0 
@@ -175,8 +175,12 @@ public enum CharacterState implements State<Entity> {
 			Skeleton skeleton = skeletonComponent.skeleton;
 			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
 			Float charY=skeleton.getY();
+			System.out.println("tracks:"+skeletonComponent.animationState.getTracks().size+" 连击:"+
+					stateComponent.combo);
+			System.out.println(skeletonComponent.animationState.getCurrent(0));
+			System.out.println(skeletonComponent.animationState.getCurrent(0).getNext());
 			if (skeletonComponent.animationState.getCurrent(0).isComplete()) {
-				stateComponent.OpressedTimes=0;
+				stateComponent.combo=0;
 			}
 			if(MathUtils.isEqual(charY, landY)&&//着地
 					skeletonComponent.animationState.getCurrent(0).isComplete()){
@@ -190,7 +194,8 @@ public enum CharacterState implements State<Entity> {
 		public void enter(Entity entity) {
 			CharacterStateComponent stateComponent= stateComponentMapper.get(entity);
 			SkeletonBox2dComponent skeletonComponent=skeletonBox2dComponentMapper.get(entity);
-			TrackEntry te=skeletonComponent.animationState.setAnimation(0, "atk1", false);
+			skeletonComponent.animationState.setAnimation(0, "atk1", true);
+//			skeletonComponent.animationState.addAnimation(0, "atk2", true, 0);
 			if (stateComponent.atkNum==2) {
 				skeletonComponent.animationState.setAnimation(0, "atk2", false);
 //				te.setTime(10);
@@ -217,21 +222,24 @@ public enum CharacterState implements State<Entity> {
 					skeletonComponent.animationState.getCurrent(0).isComplete()){
 				skeletonComponent.animationState.setAnimation(0, "fall", false);
 			}
-			System.out.println(charStateComponent.OpressedTimes);
 			if(!joystick.OKey&&charStateComponent.OpressedDuration>0
-					&&charStateComponent.OpressedDuration <= GameData.instance.atkComboInterval
-					&& charStateComponent.OpressedTimes>=1){
-				charStateComponent.OpressedTimes++;//进行连击
+					&&charStateComponent.OpressedDuration <= GameData.instance.atkThreshold
+					&& charStateComponent.combo>=1 && GameData.instance.comboTime>0){
+				charStateComponent.combo++;//进行连击
 				charStateComponent.OpressedDuration=0;//重计有效时间
+				GameData.instance.comboTime=GameData.atkComboInterval;
+				if (charStateComponent.combo>=2
+						&& !skeletonComponent.animationState.getCurrent(0).isComplete()) {
+					skeletonComponent.animationState.addAnimation(1, "atk2", false,1);
+					System.out.println("next track "+skeletonComponent.animationState.getCurrent(0).getNext());
+					System.out.println(charStateComponent.combo+" 连击");
+				}
 			}else if (!joystick.OKey&&charStateComponent.OpressedDuration>0
-					&&charStateComponent.OpressedDuration > GameData.instance.atkComboInterval
-					&& charStateComponent.OpressedTimes >=1) {
-				charStateComponent.OpressedTimes=1;//进行连击
+					&&charStateComponent.OpressedDuration > GameData.instance.atkThreshold
+					&& charStateComponent.combo >=1 && GameData.instance.comboTime<=0) {
+				charStateComponent.combo=1;//连击失 效, 重置计数器
 				charStateComponent.OpressedDuration=0;//重计有效时间
-			}
-			if (charStateComponent.OpressedTimes>=2
-					&& !skeletonComponent.animationState.getCurrent(0).isComplete()) {
-				skeletonComponent.animationState.addAnimation(0, "atk2", false, 0);
+				GameData.instance.comboTime=GameData.atkComboInterval;
 			}
 		}//end update
 		
@@ -245,7 +253,7 @@ public enum CharacterState implements State<Entity> {
 			SkeletonBox2dComponent skeletonComponent=skeletonBox2dComponentMapper.get(entity);
 			TrackEntry te=skeletonComponent.animationState.setAnimation(0, "block", false);
 			
-			stateComponent.OpressedTimes=0;//清空连击计数
+			stateComponent.combo=0;//清空连击计数
 		}
 
 		@Override
@@ -443,7 +451,7 @@ public enum CharacterState implements State<Entity> {
 				return JumpState;
 			}else if (joystick.downKey) {
 				return SquatState;
-			}else if (state.OpressedTimes>0) {
+			}else if (state.combo>0) {
 				return AtkState;
 			}else if (state.OpressedDuration>GameData.instance.atkThreshold) {
 				return BlockState;

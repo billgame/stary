@@ -176,6 +176,11 @@ public class SkeletonControlSystem extends IteratingSystem implements EntityList
 		
 		stateComponent.stateMachine.update();
 		
+		if (GameData.instance.comboTime>0) {
+			GameData.instance.comboTime-=deltaTime;
+		}else {
+			
+		}
 		
 		if (joystickComponent.OKey 
 				&& stateComponent.OpressedDuration < GameData.instance.atkThreshold) {
@@ -187,12 +192,13 @@ public class SkeletonControlSystem extends IteratingSystem implements EntityList
 		}else if (!joystickComponent.OKey 
 				&& stateComponent.OpressedDuration > GameData.instance.atkThreshold) {
 			stateComponent.OpressedDuration=0;  //解除防守状态
-			stateComponent.OpressedTimes=0;//
+			stateComponent.combo=0;//
 		}else if (!joystickComponent.OKey&&stateComponent.OpressedDuration>0
 					&&stateComponent.OpressedDuration < GameData.instance.atkThreshold
-					&& stateComponent.OpressedTimes==0) {
-			stateComponent.OpressedTimes=1;//首次攻击
+					&& stateComponent.combo==0) {
+			stateComponent.combo=1;//首次攻击
 			stateComponent.OpressedDuration=0;
+			GameData.instance.comboTime=GameData.atkComboInterval;
 		}
 //		else if(!joystickComponent.OKey&&stateComponent.OpressedDuration>0
 //					&&stateComponent.OpressedDuration <= GameData.instance.atkComboInterval

@@ -66,8 +66,9 @@ public class GameData {
 	public float voice=1.0f;
 	public long currentCharacter=-1;
 	
-	public float atkThreshold=0.75f;
-	public float atkComboInterval=0.35f;
+	public static final float atkThreshold=0.8f;//判读是攻击还是防守   >=.45是防守,小于是攻击
+	public static final float atkComboInterval=0.8f;//连击有效时间段
+	public float comboTime=0;
 //	public Map<String,String> forces_db=new HashMap<String,String>();
 //	public Map<String,UnitData> units_db=new HashMap<String,UnitData>();
 //	public Map<String,WeaponData> weapons_db=new HashMap<String,WeaponData>();

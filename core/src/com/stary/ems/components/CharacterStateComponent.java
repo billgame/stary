@@ -50,7 +50,7 @@ public class CharacterStateComponent implements Component {
 //	public boolean XKey=false;
 //	public boolean jumpKey=false;
 	public float OpressedDuration;
-	public float OpressedTimes;
+	public float combo;
 
 //	public final static long leftKey=1<<1;
 //	public final static long rightKey=1<<2;
