@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
+import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationState.TrackEntry;
 import com.esotericsoftware.spine.Skeleton;
 import com.stary.data.GameData;
@@ -173,18 +174,27 @@ public enum CharacterState implements State<Entity> {
 //				return IdleState;
 //			}
 			Skeleton skeleton = skeletonComponent.skeleton;
+			AnimationState animState= skeletonComponent.animationState;
 			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
 			Float charY=skeleton.getY();
-			System.out.println("tracks:"+skeletonComponent.animationState.getTracks().size+" 连击:"+
-					stateComponent.combo);
-			System.out.println(skeletonComponent.animationState.getCurrent(0));
-			System.out.println(skeletonComponent.animationState.getCurrent(0).getNext());
-			if (skeletonComponent.animationState.getCurrent(0).isComplete()) {
+//			System.out.println("tracks:"+animState.getTracks().size+" 连击:"+
+//					stateComponent.combo);
+//			System.out.println(animState.getCurrent(0));
+//			System.out.println(animState.getCurrent(0).getNext());
+			boolean isFinished=true;
+			for(TrackEntry te:animState.getTracks()){
+				if (te!=null && !te.isComplete()) {
+					isFinished=false;
+				}
+			}
+
+			if (isFinished) {
 				stateComponent.combo=0;
 			}
 			if(MathUtils.isEqual(charY, landY)&&//着地
-					skeletonComponent.animationState.getCurrent(0).isComplete()){
+					isFinished){
 				stateComponent.velocity.y=0;
+				animState.clearTracks();
 				return IdleState;
 			}
 			return null;
@@ -197,7 +207,7 @@ public enum CharacterState implements State<Entity> {
 			skeletonComponent.animationState.setAnimation(0, "atk1", true);
 //			skeletonComponent.animationState.addAnimation(0, "atk2", true, 0);
 			if (stateComponent.atkNum==2) {
-				skeletonComponent.animationState.setAnimation(0, "atk2", false);
+				skeletonComponent.animationState.setAnimation(0, "atk1", true);
 //				te.setTime(10);
 //				te.setEndTime(40);
 			}
@@ -219,7 +229,7 @@ public enum CharacterState implements State<Entity> {
 			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
 			Float charY=skeleton.getY();
 			if(!MathUtils.isEqual(charY, landY)&&//未着地,攻击动作完成了,下降姿势
-					skeletonComponent.animationState.getCurrent(0).isComplete()){
+					skeletonComponent.animationState.getCurrent(0).isComplete()){//TODO 所有动画检查一遍,皆完成了才FALL动画
 				skeletonComponent.animationState.setAnimation(0, "fall", false);
 			}
 			if(!joystick.OKey&&charStateComponent.OpressedDuration>0
@@ -228,11 +238,14 @@ public enum CharacterState implements State<Entity> {
 				charStateComponent.combo++;//进行连击
 				charStateComponent.OpressedDuration=0;//重计有效时间
 				GameData.instance.comboTime=GameData.atkComboInterval;
-				if (charStateComponent.combo>=2
+				if (charStateComponent.combo>=3
 						&& !skeletonComponent.animationState.getCurrent(0).isComplete()) {
-					skeletonComponent.animationState.addAnimation(1, "atk2", false,1);
-					System.out.println("next track "+skeletonComponent.animationState.getCurrent(0).getNext());
-					System.out.println(charStateComponent.combo+" 连击");
+					if (skeletonComponent.animationState.getTracks().size==1) {
+						skeletonComponent.animationState.addAnimation(1, "atk2", false,1);
+					}
+					
+//					System.out.println("next track "+skeletonComponent.animationState.getCurrent(0).getNext());
+//					System.out.println(charStateComponent.combo+" 连击");
 				}
 			}else if (!joystick.OKey&&charStateComponent.OpressedDuration>0
 					&&charStateComponent.OpressedDuration > GameData.instance.atkThreshold
@@ -294,6 +307,7 @@ public enum CharacterState implements State<Entity> {
 //			CharacterStateComponent stateComponent= stateComponentMapper.get(entity);
 			SkeletonBox2dComponent skeletonComponent=skeletonBox2dComponentMapper.get(entity);
 			TrackEntry te=skeletonComponent.animationState.setAnimation(0, "down", false);
+			System.out.println("enter squat");
 		}
 
 		@Override
@@ -327,7 +341,7 @@ public enum CharacterState implements State<Entity> {
 			if (joystick.OKey) {
 				return AtkState;//冲刺击
 			}else
-			if (joystick.jumpKey) {//
+			if (joystick.justPressedJump) {//
 				return JumpState;
 			}else
 			if (joystick.upKey||!joystick.downKey) {
@@ -368,7 +382,7 @@ public enum CharacterState implements State<Entity> {
 			if (joystick.OKey) {
 				return AtkState;//上空击
 			}else 
-			if (joystick.jumpKey) {
+			if (joystick.justPressedJump) {
 				return JumpState;
 			}else
 			if (joystick.downKey||!joystick.upKey) {
@@ -440,16 +454,14 @@ public enum CharacterState implements State<Entity> {
 		@Override
 		public CharacterState canGotoState(long keys, SkeletonBox2dComponent skeletonComponent,
 				CharacterStateComponent state, JoystickComponent joystick) {
-			if (joystick.downKey) {
-				return CharacterState.SquatState;
-			}else if(joystick.upKey){
+			if(joystick.upKey && !joystick.downKey){
 				return UpState;
 			}else if ((joystick.rightKey|joystick.leftKey) 
 					&& !(joystick.rightKey&&joystick.leftKey) ) {
 				return WalkState;
-			}else if (joystick.jumpKey) {
+			}else if (joystick.justPressedJump) {
 				return JumpState;
-			}else if (joystick.downKey) {
+			}else if (joystick.downKey&& !joystick.upKey) {
 				return SquatState;
 			}else if (state.combo>0) {
 				return AtkState;
