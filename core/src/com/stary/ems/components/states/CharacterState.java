@@ -37,7 +37,8 @@ public enum CharacterState implements State<Entity> {
 			Skeleton skeleton = skeletonComponent.skeleton;
 			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
 			Float charY=skeleton.getY();
-			if(MathUtils.isEqual(charY, landY)&& state.velocity.y<0/*&&!joystick.justPressedJump*/){//着地
+			if(MathUtils.isEqual(charY, landY)&& state.velocity.y<0
+					/*&&!joystick.justPressedJump*/){//着地
 				if (joystick.rightKey||joystick.leftKey) {
 				}
 				state.velocity.y=0;
@@ -54,6 +55,7 @@ public enum CharacterState implements State<Entity> {
 			skeletonComponent.animationState.setAnimation(0, "jump", false);
 			stateComponent.jumpTime=1;
 			stateComponent.velocity.y+=stateComponent.jumpVelocity;
+			System.out.println("enter jump");
 		}
 
 		@Override
@@ -66,17 +68,18 @@ public enum CharacterState implements State<Entity> {
 				stateComponent.stateMachine.changeState(newState);
 				return;//状态跳转
 			}
-
+			//二级跳
 			if (joystick.justPressedJump&& stateComponent.jumpTime==1) {
 				stateComponent.velocity.y=0;
 				stateComponent.velocity.y+=1.2f*stateComponent.jumpVelocity;
 				stateComponent.jumpTime++;
+				//TODO 加入二级跳动画
 				System.out.println("[jumpState.update]jump plus");
 			}
 			Skeleton skeleton = skeletonComponent.skeleton;
 			Float landY=Box2dUtil.getLandY(GameData.instance.land, skeleton.getX());
 			Float charY=skeleton.getY();
-			System.out.println(stateComponent.velocity.y);
+//			System.out.println(stateComponent.velocity.y);
 			stateComponent.velocity.y+=Gdx.graphics.getDeltaTime()*GameData.instance.gravity.y;
 			if (stateComponent.velocity.y<0) {
 				skeletonComponent.animationState.setAnimation(0, "fall", true);
@@ -503,7 +506,16 @@ public enum CharacterState implements State<Entity> {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	/**
+	 * 用过检测按下的键,判断是否改变状态
+	 * @param keys
+	 * @param skeletonComponent
+	 * @param state
+	 * @param joystick
+	 * @return
+	 */
 	public abstract CharacterState canGotoState(long keys,SkeletonBox2dComponent skeletonComponent,CharacterStateComponent state,JoystickComponent joystick);
+	/*废弃*/
 	class Mapper{
 		ArrayMap<Long,CharacterState> jumpCanGoToState=new ArrayMap<Long,CharacterState>();
 		ArrayMap<Long,CharacterState> walkCanGoToState=new ArrayMap<Long,CharacterState>();

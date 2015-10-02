@@ -46,56 +46,33 @@ public class CharacterControler  implements InputProcessor{
 	public boolean keyDown(int keycode) {
 		Entity player=GameData.ashley.getEntity(GameData.instance.currentCharacter);
 		if (player==null) return false;
-		SkeletonBox2dComponent sb=player.getComponent(SkeletonBox2dComponent.class);
-		CharacterStateComponent state=player.getComponent(CharacterStateComponent.class);
+//		SkeletonBox2dComponent sb=player.getComponent(SkeletonBox2dComponent.class);
+//		CharacterStateComponent state=player.getComponent(CharacterStateComponent.class);
 		JoystickComponent joystick=player.getComponent(JoystickComponent.class);
 		switch (keycode) {
 		case Keys.LEFT: //left
 			joystick.leftKey=true;
 			joystick.justPressedLeft=true;
-			if (state.state==State.idle) {
-				state.state=State.walk;
-			}
-			
 			break;
 		case Keys.RIGHT://right
 			joystick.rightKey=true;
 			joystick.justPressedRight=true;
-			if (state.state==State.idle/*!state.atkState&&!state.jumpState&&!state.downState&&!state.upState
-					&&!state.blockState*/) {
-				state.state=State.walk;
-			}
 			break;
 		case Keys.UP://up
 			joystick.upKey=true;
 			joystick.justPressedUp=true;
-			if (state.state!=State.atk && state.state!=State.jump ) {
-				state.state=State.up;
-			}
 			break;
 		case Keys.DOWN://down //下蹲
 			joystick.downKey=true;
 			joystick.justPressedDown=true;
-			if (state.state!=State.jump && state.state!=State.atk) {
-				state.state=State.down;
-			}
 			break;
 		case Keys.NUMPAD_0://jump
 			joystick.jumpKey=true;
 			joystick.justPressedJump=true;
-			if (state.state!=State.atk && state.state!=State.down) {
-				if (state.jumpTime<2) {
-					state.jumpTime++;
-				}
-				state.state=State.jump;
-			}
 			break;
 		case Keys.NUMPAD_1://attack
 			joystick.OKey=true;//block状态由System判断。
 			joystick.justPressedO=true;
-//			if (state.state!=State.block) {
-//				state.state=State.atk;
-//			}
 			break;
 		case Keys.NUMPAD_2://cancel
 			joystick.XKey=true;
@@ -118,49 +95,25 @@ public class CharacterControler  implements InputProcessor{
 		switch (keycode) {
 		case Keys.LEFT: //left
 			joystick.leftKey=false;
-			if (state.state==State.walk) {
-				state.state=State.idle;
-			}
-//			else if(state.state==State.idle &&){
-//				
-//			}
 			break;
 		case Keys.RIGHT://right
 			joystick.rightKey=false;
-			if (state.state==State.walk) {
-				state.state=State.idle;
-//				System.out.println("idle");
-			}
 			break;
 		case Keys.UP://up
 			joystick.upKey=false;
-			if (state.state==State.up) {
-				state.state=State.idle;
-			}
 			break;
 		case Keys.DOWN://down
 			joystick.downKey=false;
-			if (state.state==State.down) {
-				state.state=State.idle;
-			}
 			break;
 		case Keys.NUMPAD_0://jump
 			joystick.jumpKey=false;
 			break;
 		case Keys.NUMPAD_1://attack
 			joystick.OKey=false;
-//			if (state.state!=State.block) {
-//				float duration=state.OpressedDuration;
-//				System.out.println(duration);
-//				if (duration<0.3f) {
-//					state.state=State.atk;
-////					state.atkDuration=0;
-//				}
-//			}
 			break;
-//		case Keys.K://cancel
-//			state.XKey=false;
-//			break;
+		case Keys.NUMPAD_2://cancel
+			joystick.XKey=false;
+			break;
 
 		default:
 			break;
